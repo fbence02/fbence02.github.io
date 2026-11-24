@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#090b0b">
+  <meta name="description" content="Backrooms: Liminal Descent — a procedural co-op liminal horror experience.">
+  <title>BACKROOMS: LIMINAL DESCENT</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/",
+      "peerjs": "https://esm.sh/peerjs@1.5.5"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="game-root">
+    <canvas id="game-canvas" aria-label="3D game view"></canvas>
+    <div id="vhs-overlay" class="vhs-overlay" aria-hidden="true"><div class="scanlines"></div><div class="vignette"></div><div class="noise"></div><div class="tracking"></div></div>
+
+    <section id="main-menu" class="screen visible">
+      <div class="brand-block"><div class="brand-kicker">AN INTERACTIVE LIMINAL NIGHTMARE</div><h1>BACKROOMS<span>:</span><br><em>LIMINAL DESCENT</em></h1><p class="tagline">NO MAP. NO SIGNAL. NO WAY BACK.</p></div>
+      <div class="menu-panel">
+        <button id="solo-btn" class="button primary">DESCEND ALONE</button>
+        <button id="host-btn" class="button">HOST CO-OP GAME</button>
+        <div class="join-row"><input id="room-code-input" maxlength="4" autocomplete="off" spellcheck="false" placeholder="ROOM CODE" aria-label="Room code"><button id="join-btn" class="button">JOIN</button></div>
+        <button id="settings-open-main" class="button subtle">SETTINGS</button>
+        <div class="menu-foot"><span>BUILD 0.3.1 // ESCAPE & MULTI-FLOOR UPDATE</span><span>HEADPHONES RECOMMENDED</span></div>
+      </div>
+    </section>
+
+    <section id="lobby-screen" class="screen">
+      <div class="lobby-top"><div><div class="eyebrow">SAFE ROOM // CHECK-IN</div><h2>PRE-DESCENT LOBBY</h2></div><div class="room-badge">ROOM <strong id="lobby-room-code">SOLO</strong></div></div>
+      <div class="lobby-grid">
+        <div class="panel player-panel"><div class="panel-heading"><span>CONNECTED SURVIVORS</span><span id="player-count">1 / 4</span></div><div id="lobby-player-list" class="player-list"></div><div class="panel-actions"><button id="copy-code-btn" class="button subtle">COPY ROOM CODE</button><button id="mic-enable-btn" class="button subtle">ENABLE MICROPHONE</button></div></div>
+        <div class="panel customize-panel"><div class="panel-heading"><span>FIELD EQUIPMENT</span><span>AVATAR CONFIG</span></div><div class="avatar-preview-wrap"><canvas id="avatar-preview-canvas" aria-label="Live 3D character preview"></canvas><div class="preview-caption"><span>LIVE 3D PREVIEW</span><small>ROTATING MODEL // LOADOUT SYNCED</small></div></div>
+          <label class="field-label" for="outfit-select">OUTFIT</label><select id="outfit-select"><option value="hazmat">Hazmat Suit</option><option value="tactical">Tactical Explorer</option><option value="maintenance">Maintenance Worker</option><option value="researcher">Lab Researcher</option></select>
+          <div class="color-row"><label>PRIMARY SUIT<input id="primary-color" type="color" value="#b7a65c"></label><label>VISOR / ACCENT<input id="accent-color" type="color" value="#55d7d0"></label></div>
+          <div class="field-label misc-label">ATTACHMENTS</div><div class="misc-grid">
+            <label><input type="checkbox" data-misc="shoulderLight"> Shoulder flashlight</label><label><input type="checkbox" data-misc="backpack" checked> Tactical backpack</label>
+            <label><input type="checkbox" data-misc="gasMask"> Dual-filter mask</label><label><input type="checkbox" data-misc="bodycam"> Head bodycam</label>
+            <label><input type="checkbox" data-misc="glowsticks"> Belt glowsticks</label><label><input type="checkbox" data-misc="antenna"> Radio antenna</label>
+          </div>
+          <div class="difficulty-row"><label class="field-label" for="difficulty-select">THREAT PROFILE</label><select id="difficulty-select"><option value="EXPLORER">EXPLORER — NO ENTITIES</option><option value="EASY">EASY</option><option value="NORMAL" selected>NORMAL</option><option value="HARD">HARD</option></select></div>
+          <p class="mission-note">EVERY DESCENT GENERATES A DIFFERENT OBJECTIVE: drain valves, power nodes, garden beacons, mirror anchors, pressure systems and more. Explore four to five massive floors with different randomized architecture, water, ice, steam, darkness, atriums and warehouse zones. Use stair flights, jump over obstacles, and hide in lockers, curtained alcoves or crate cover. Crouch with LEFT CTRL and jump with SPACE. Sprinting and voice attract nearby entities.</p>
+        </div>
+      </div>
+      <div class="lobby-bottom"><button id="lobby-back-btn" class="button subtle">BACK</button><p id="lobby-status">WAITING FOR DESCENT AUTHORIZATION</p><button id="start-game-btn" class="button primary">BEGIN DESCENT</button></div>
+    </section>
+
+    <section id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="modal-card settings-card"><div class="modal-head"><div><div class="eyebrow">SYSTEM CONFIGURATION</div><h2 id="settings-title">SETTINGS</h2></div><button id="settings-close" class="icon-button" aria-label="Close settings">×</button></div>
+        <div class="settings-layout"><nav class="settings-tabs" aria-label="Settings categories"><button class="tab active" data-tab="graphics">GRAPHICS</button><button class="tab" data-tab="audio">AUDIO & VOICE</button><button class="tab" data-tab="controls">CONTROLS</button><button class="tab" data-tab="accessibility">ACCESSIBILITY</button></nav>
+          <div class="settings-content">
+            <div class="tab-page active" data-page="graphics">
+              <label>Resolution scale <output id="resolution-value">1.0×</output><input id="resolution-scale" type="range" min="0.5" max="1" step="0.05" value="1"></label>
+              <label>Shadow quality<select id="shadow-quality"><option>Off</option><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+              <label>Fog density <output id="fog-value">0.035</output><input id="fog-density" type="range" min="0.005" max="0.09" step="0.005" value="0.035"></label>
+              <label>Field of view <output id="fov-value">78°</output><input id="fov" type="range" min="60" max="110" step="1" value="78"></label>
+              <label>Brightness <output id="brightness-value">1.0</output><input id="brightness" type="range" min="0.7" max="1.5" step="0.05" value="1"></label>
+              <label class="check-line"><input id="vhs-enabled" type="checkbox" checked> VHS post-processing</label>
+            </div>
+            <div class="tab-page" data-page="audio">
+              <label>Master volume <output id="master-volume-value">80%</output><input id="master-volume" type="range" min="0" max="1" step="0.01" value="0.8"></label>
+              <label>Effects volume <output id="sfx-volume-value">90%</output><input id="sfx-volume" type="range" min="0" max="1" step="0.01" value="0.9"></label>
+              <label>Ambient volume <output id="ambient-volume-value">65%</output><input id="ambient-volume" type="range" min="0" max="1" step="0.01" value="0.65"></label>
+              <label>Voice chat volume <output id="voice-volume-value">85%</output><input id="voice-volume" type="range" min="0" max="1" step="0.01" value="0.85"></label>
+              <label>Microphone gain <output id="mic-gain-value">100%</output><input id="mic-gain" type="range" min="0" max="2" step="0.05" value="1"></label>
+              <label>Input device<select id="audio-input"><option value="">Default microphone</option></select></label>
+              <label>Voice mode<select id="voice-mode"><option value="ptt">Push to talk (V)</option><option value="open">Open microphone</option></select></label>
+              <label class="check-line"><input id="spatial-audio" type="checkbox" checked> Spatial voice audio</label>
+              <button id="settings-mic-btn" class="button subtle">REQUEST MICROPHONE ACCESS</button>
+            </div>
+            <div class="tab-page" data-page="controls">
+              <label>Mouse sensitivity <output id="sensitivity-value">0.8</output><input id="sensitivity" type="range" min="0.2" max="2" step="0.05" value="0.8"></label>
+              <label class="check-line"><input id="invert-y" type="checkbox"> Invert Y-axis</label>
+              <label>Head-bobbing <output id="bobbing-value">50%</output><input id="bobbing" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+              <label>Camera shake <output id="shake-value">60%</output><input id="shake" type="range" min="0" max="1" step="0.05" value="0.6"></label>
+              <div class="keybinds" id="keybind-list"></div>
+            </div>
+            <div class="tab-page" data-page="accessibility">
+              <label class="check-line"><input id="captions" type="checkbox" checked> Closed captions</label>
+              <label class="check-line"><input id="photosensitive" type="checkbox"> Photosensitivity mode</label>
+              <label class="check-line"><input id="high-contrast" type="checkbox"> High-contrast HUD</label>
+              <p class="settings-note">Photosensitivity mode reduces intense flicker and camera shake. Captions describe important ambient and entity audio cues.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot"><span>CHANGES SAVE AUTOMATICALLY</span><button id="settings-done" class="button primary">DONE</button></div>
+      </div>
+    </section>
+
+    <section id="pause-screen" class="screen pause-screen"><div class="pause-card"><div class="eyebrow">SIGNAL INTERRUPTED</div><h2>PAUSED</h2><button id="resume-btn" class="button primary">RESUME</button><button id="settings-open-pause" class="button">SETTINGS</button><button id="leave-btn" class="button subtle">RETURN TO TITLE</button></div></section>
+
+    <div id="game-hud" class="game-hud hidden">
+      <div class="hud-top"><div class="level-label"><span>LOCATION</span><strong id="level-name">LEVEL 0 — THE LOBBY</strong><small id="floor-label">FLOOR 1 / 3</small><small id="objective-label">SIGNAL RELAYS 0/3</small></div><div class="sanity-wrap"><span>SANITY</span><div class="meter"><i id="sanity-meter"></i></div></div></div>
+      <div class="hud-bottom"><div class="status-stack"><div>STAMINA <div class="meter"><i id="stamina-meter"></i></div></div><div>FLASHLIGHT <div class="meter"><i id="battery-meter"></i></div></div><div class="inventory" id="inventory-label">BATTERIES 0 · ALMOND WATER 0</div></div><div class="crosshair">+</div><div class="interaction-hint" id="interaction-hint"></div><div class="voice-indicator" id="voice-indicator">MIC READY</div><div class="stealth-indicator" id="stealth-indicator"></div></div>
+    </div>
+    <div id="subtitle-box" class="subtitle-box" aria-live="polite"></div>
+    <div id="toast" class="toast" aria-live="polite"></div>
+    <div id="jumpscare-flash" class="jumpscare-flash" aria-hidden="true"></div>
+    <div id="downed-overlay" class="downed-overlay hidden"><div class="downed-card"><div class="eyebrow">LIFE SUPPORT CRITICAL</div><h2>YOU ARE DOWN</h2><p id="downed-message">A teammate can revive you with Almond Water.</p><button id="spectate-btn" class="button subtle">SPECTATE TEAMMATE</button><button id="downed-restart-btn" class="button primary">RESTART LEVEL</button><button id="downed-return-btn" class="button">RETURN TO SAFE ROOM</button></div></div>
+  </div>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

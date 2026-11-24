@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="hu" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektek | Pigszar Studio</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        darkbg: '#090d16',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Finom háttérháló (Grid pattern) */
+        .bg-grid-pattern {
+            background-size: 36px 36px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        }
+
+        /* Egységes Glassmorphism kártyák */
+        .project-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .project-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(99, 102, 241, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-indigo-500 selection:text-white">
+
+    <!-- Háttér neon világítás (Glow Effects) -->
+    <div class="fixed top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-pink-600/10 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+
+    <div class="relative z-10 flex flex-col min-h-screen">
+        
+        <!-- Header -->
+        <header class="w-full border-b border-white/5 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                <!-- Branding -->
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 p-[1px] flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
+                            <span class="text-indigo-400 font-black text-sm">P</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="font-bold text-base tracking-tight text-white">Pigszar Studio</span>
+                        <span class="block text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Project Launcher</span>
+                    </div>
+                </div>
+
+                <!-- Projekt számláló -->
+                <div class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-gray-300">
+                    Összesen: <span id="project-count" class="text-indigo-400 font-bold">0</span> projekt
+                </div>
+            </div>
+        </header>
+
+        <!-- Fő tartalom -->
+        <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
+            
+            <!-- Címsor -->
+            <div class="text-center max-w-xl mx-auto mb-10">
+                <span class="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold uppercase tracking-wider inline-block mb-3">
+                    Portfólió & Gyűjtemény
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+                    Válassz <span class="bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">projektet</span>
+                </h1>
+                <p class="text-gray-400 text-sm sm:text-base">
+                    Kattints a kártyák bármelyikére az elindításához.
+                </p>
+            </div>
+
+            <!-- Kereső és Szűrő sáv -->
+            <div class="max-w-2xl mx-auto mb-8 flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative w-full">
+                    <input type="text" id="search-input" placeholder="Keresés név szerint..." 
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 pl-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    <svg class="w-4 h-4 text-gray-500 absolute left-3.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <!-- Kategória szűrők -->
+                <div id="filter-buttons" class="flex items-center gap-1.5 w-full sm:w-auto justify-center">
+                    <!-- Dinamikusan töltődik fel JS-ből -->
+                </div>
+            </div>
+
+            <!-- EGYSÉGES PROJEKT GRID -->
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- A kártyák a JavaScript kód segítségével töltődnek be automatikusan -->
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="w-full border-t border-white/5 py-6 text-center text-xs text-gray-500">
+            <p>&copy; 2026 Pigszar Studio. Minden jog fenntartva.</p>
+        </footer>
+
+    </div>
+
+    <!-- PROJEKTEK KEZELÉSE ÉS DINAMIKUS RENDERELÉSE -->
+    <script>
+        /*
+         ========================================================================
+         ÚJ PROJEKT HOZZÁADÁSA:
+         Egyszerűen másold le az alábbi sorok egyikét, és írd át az adatokat!
+         Minden projekt pontosan ugyanolyan, egységes megjelenést kap.
+         ========================================================================
+        */
+        const PROJECTS = [
+            {
+                title: "F1 Game",
+                url: "https://fbence02.github.io/pigszarstudio/f1/index.html",
+                tag: "Játék",
+                desc: "Versenyezz a legjobb időeredményért!"
+            },
+            {
+                title: "Juracs Adventures",
+                url: "https://fbence02.github.io/pigszarstudio/juracs_adventures/index.html",
+                tag: "Játék",
+                desc: "Izgalmas kalandjáték kihívásokkal."
+            },
+            {
+                title: "Réka beadandó",
+                url: "https://fbence02.github.io/pigszarstudio/twilight/index.html",
+                tag: "Web",
+                desc: "Különleges Twilight témájú weboldal."
+            },
+            {
+                title: "Backrooms játék (AI)",
+                url: "https://fbence02.github.io/pigszarstudio/backrooms/backrooms.html",
+                tag: "AI",
+                desc: "Nyomasztó labirintus sárga szobákkal."
+            },
+            {
+                title: "Snake (AI)",
+                url: "https://fbence02.github.io/pigszarstudio/snake/snake.html",
+                tag: "AI",
+                desc: "A klasszikus kígyós játék AI kiadása."
+            },
+            {
+                title: "Backrooms Multiplayer",
+                url: "https://fbence02.github.io/pigszarstudio/brmp/index.html",
+                tag: "AI",
+                desc: "Backrooms játék multiplayer módban (sokkal komolyabb mint a single)"
+            }
+            /* Új projekt példa:
+            ,{
+                title: "Új Játék Címe",
+                url: "https://fbence02.github.io/pigszarstudio/uj-projekt/index.html",
+                tag: "Játék",
+                desc: "Rövid leírás a projektről."asdasdasd
+            }
+            */
+        ];
+
+        // Címke stílusok hozzárendelése (Színek)
+        const TAG_STYLES = {
+            "Játék": "bg-amber-500/10 text-amber-400 border-amber-500/20",
+            "AI": "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+            "Web": "bg-pink-500/10 text-pink-400 border-pink-500/20",
+            "Egyéb": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+        };
+
+        let currentFilter = 'Mind';
+
+        // Projektek kirajzolása
+        function renderProjects(items) {
+            const container = document.getElementById('projects-grid');
+            document.getElementById('project-count').textContent = items.length;
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500 text-sm">
+                        Nincs a keresésnek megfelelő projekt.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map(proj => {
+                const tagStyle = TAG_STYLES[proj.tag] || TAG_STYLES["Egyéb"];
+                return `
+                    <a href="${proj.url}" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="project-card rounded-2xl p-5 flex flex-col justify-between group">
+                        
+                        <div>
+                            <!-- Felső sáv: Címke és Ikon -->
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-md border ${tagStyle}">
+                                    ${proj.tag}
+                                </span>
+                                <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-indigo-400 group-hover:border-indigo-500/30 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Projekt Cím & Leírás -->
+                            <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors mb-1.5">
+                                ${proj.title}
+                            </h3>
+                            <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                ${proj.desc}
+                            </p>
+                        </div>
+
+                        <!-- Alsó megnyitás sáv -->
+                        <div class="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-gray-400 group-hover:text-indigo-300 transition-colors">
+                            <span>Projekt megnyitása</span>
+                            <svg class="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // Szűrő gombok előállítása
+        function setupFilters() {
+            const tags = ['Mind', ...new Set(PROJECTS.map(p => p.tag))];
+            const filterContainer = document.getElementById('filter-buttons');
+
+            filterContainer.innerHTML = tags.map(tag => `
+                <button onclick="filterByTag('${tag}')" 
+                        class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+                            tag === 'Mind' 
+                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20' 
+                            : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
+                        }" data-tag="${tag}">
+                    ${tag}
+                </button>
+            `).join('');
+        }
+
+        // Címke szerinti szűrés
+        function filterByTag(tag) {
+            currentFilter = tag;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.tag === tag) {
+                    btn.className = 'filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20';
+                } else {
+                    btn.className = 'filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white';
+                }
+            });
+            applyFilters();
+        }
+
+        // Szűrők és keresés alkalmazása
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filtered = PROJECTS.filter(proj => {
+                const matchesTag = (currentFilter === 'Mind' || proj.tag === currentFilter);
+                const matchesSearch = proj.title.toLowerCase().includes(searchTerm) || proj.desc.toLowerCase().includes(searchTerm);
+                return matchesTag && matchesSearch;
+            });
+            renderProjects(filtered);
+        }
+
+        // Kereső eseményfigyelő
+        document.getElementById('search-input').addEventListener('input', applyFilters);
+
+        // Kezdő inicializálás
+        window.addEventListener('DOMContentLoaded', () => {
+            setupFilters();
+            renderProjects(PROJECTS);
+        });
+    </script>
+</body>
+</html>
